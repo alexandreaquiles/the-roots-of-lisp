@@ -424,7 +424,7 @@
 
 (eval. '((lambda (x y) (cons x (cdr y))) 'a '(b c d)) '())
 ;(A C D)
-[
+
 
 (eval. '(cons x (cdr y)) '((x a) (y (b c d))))
 ;(A C D)
