@@ -190,6 +190,8 @@
               (subst. x y (cdr z))))))
 ;SUBST.
 
+;'t is a convention (everything that is not NIL is truthy)
+
 (subst. 'm 'b '(a b (a b c) d))
 ;(A M (A M C) D)
 
