@@ -185,6 +185,30 @@
 ; The Surprise
 
 (defn eval* [e a]
+  (defn atom* [x]
+    (or (= x '()) (not (seq? x))))
+  (defn null* [x]
+    (= x '()))
+  (defn and* [x y]
+    (cond x
+          (cond y true
+                :default false)
+          :default false))
+  (defn not* [x]
+    (cond x false
+          :default true))
+  (defn append* [x y]
+    (cond (null* x) y
+          :default (cons (first x) (append* (rest x) y))))
+  (defn pair* [x y]
+    (cond (and* (null* x) (null* y)) '()
+          (and* (not* (atom* x)) (not* (atom* y)))
+          (cons (list (first x) (first y))
+                (pair* (rest x) (rest y)))))
+  (defn assoc* [x y]
+    (cond (= (first (first y)) x)
+          (first (rest (first y)))
+          :default (assoc* x (rest y))))
   (defn evcon* [c a]
     (cond (eval* (first (first c)) a) (eval* (first (rest (first c))) a)
           :default (evcon* (rest c) a)))
@@ -195,28 +219,27 @@
   (cond
     (atom* e) (assoc* e a)
     (atom* (first e))
-      (cond
-        (= (first e) 'quote) (first (rest e))
-        (= (first e) 'atom) (atom* (eval* (first (rest e)) a))
-        (= (first e) '=) (= (eval* (first (rest e)) a)
-                             (eval* (first (rest (rest e))) a))
-        (= (first e) 'first) (first (eval* (first (rest e)) a))
-        (= (first e) 'rest) (rest (eval* (first (rest e)) a))
-        (= (first e) 'cons) (cons (eval* (first (rest e)) a)
-                                  (eval* (first (rest (rest e))) a))
-        (= (first e) 'cond) (evcon* (rest e) a)
-        :default (eval* (cons (assoc* (first e) a)
-                              (rest e))
-                        a))
-    (= (first (first e)) 'label)
-      (eval* (cons (first (rest (rest (first e)))) (rest e))
-             (cons (list (first (rest (first e))) (first e)) a))
-    (= (first (first e)) 'lambda)
-      (eval* (first (rest (rest (first e))))
-             (append* (pair* (first (rest (first e)))
-                             (evlis* (rest e) a))
+    (cond
+      (= (first e) 'quote) (first (rest e))
+      (= (first e) 'atom) (atom* (eval* (first (rest e)) a))
+      (= (first e) '=) (= (eval* (first (rest e)) a)
+                          (eval* (first (rest (rest e))) a))
+      (= (first e) 'first) (first (eval* (first (rest e)) a))
+      (= (first e) 'rest) (rest (eval* (first (rest e)) a))
+      (= (first e) 'cons) (cons (eval* (first (rest e)) a)
+                                (eval* (first (rest (rest e))) a))
+      (= (first e) 'cond) (evcon* (rest e) a)
+      :default (eval* (cons (assoc* (first e) a)
+                            (rest e))
                       a))
-    ))
+    (= (first (first e)) 'label)
+    (eval* (cons (first (rest (rest (first e)))) (rest e))
+           (cons (list (first (rest (first e))) (first e)) a))
+    (= (first (first e)) 'lambda)
+    (eval* (first (rest (rest (first e))))
+           (append* (pair* (first (rest (first e)))
+                           (evlis* (rest e) a))
+                    a))))
 
 (eval* 'x '((x a) (y b)))
 ; => a
