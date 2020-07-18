@@ -198,10 +198,10 @@
       (cond
         (= (first e) 'quote) (first (rest e))
         (= (first e) 'atom) (atom* (eval* (first (rest e)) a))
-        (= (first e) 'eq) (= (eval* (first (rest e)) a)
+        (= (first e) '=) (= (eval* (first (rest e)) a)
                              (eval* (first (rest (rest e))) a))
-        (= (first e) 'car) (first (eval* (first (rest e)) a))
-        (= (first e) 'cdr) (rest (eval* (first (rest e)) a))
+        (= (first e) 'first) (first (eval* (first (rest e)) a))
+        (= (first e) 'rest) (rest (eval* (first (rest e)) a))
         (= (first e) 'cons) (cons (eval* (first (rest e)) a)
                                   (eval* (first (rest (rest e))) a))
         (= (first e) 'cond) (evcon* (rest e) a)
@@ -221,10 +221,10 @@
 (eval* 'x '((x a) (y b)))
 ; => a
 
-(eval* '(eq 'a 'a) '())
+(eval* '(= 'a 'a) '())
 ; => true
 
-(eval* '(eq 'a 'b) '())
+(eval* '(= 'a 'b) '())
 ; => false
 
 (eval* '(cons x '(b c))
@@ -232,7 +232,7 @@
 ; => (a b c)
 
 (eval* '(cond ((atom x) 'atom)
-              ('t 'list))
+              ('default 'list))
        '((x '(a b))))
 ; => list
 
@@ -246,26 +246,26 @@
 
 (eval* '((label firstatom (lambda (x)
                                   (cond ((atom x) x)
-                                        ('t (firstatom (car x))))))
+                                        ('default (firstatom (first x))))))
          y)
        '((y ((a b) (c d)))))
 ; => a
 
 (eval* '((lambda (x)
                  (cond ((atom x) x)
-                       ('t (firstatom (car x)))))
+                       ('t (firstatom (first x)))))
          y)
        '((firstatom
            (label firstatom (lambda (x)
                                     (cond ((atom x) x)
-                                          ('t (firstatom (car x)))))))
+                                          ('default (firstatom (first x)))))))
          (y ((a b) (c d)))))
 ; => a
 
-(eval* '((lambda (x y) (cons x (cdr y))) 'a '(b c d)) '())
+(eval* '((lambda (x y) (cons x (rest y))) 'a '(b c d)) '())
 ; => (a c d)
 
 
-(eval* '(cons x (cdr y)) '((x a) (y (b c d))))
+(eval* '(cons x (rest y)) '((x a) (y (b c d))))
 ; => (a c d)
 
