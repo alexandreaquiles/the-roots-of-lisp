@@ -57,6 +57,7 @@
 ; ---- eq
 
 (eq 'a 'a)
+I will fix 
 ;T
 
 (eq 'a 'b)
@@ -106,7 +107,7 @@
 
 (cons 'a 'b)
 ;(A . B)
-; 🤔️???
+; this is a pair!
 
 
 ;(cons 'a (b c))
